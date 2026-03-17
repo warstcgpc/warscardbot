@@ -13,7 +13,7 @@ IMAGE_FILE = "image_urls.txt"
 POSTED_FILE = "posted_images.txt"
 
 # Standard thread message
-THREAD_MESSAGE = "💬 Here's our card of the week — use this thread to discuss!"
+THREAD_MESSAGE = "Here's our card of the week — use this thread to discuss!"
 
 DEBUG = True  # Set to True to print extra info
 
@@ -63,33 +63,33 @@ def save_posted_image(image_url):
 def preflight_check():
     """Verify token, channel, and permissions before posting."""
     if not BOT_TOKEN or not CHANNEL_ID:
-        raise ValueError("❌ Missing BOT_TOKEN or CHANNEL_ID environment variables.")
+        raise ValueError("Missing BOT_TOKEN or CHANNEL_ID environment variables.")
 
     # 1. Check bot authentication
     r = discord_get("https://discord.com/api/v10/users/@me")
     if r.status_code == 401:
-        raise ValueError("❌ Invalid bot token. Please reset it in the Discord Developer Portal and update GitHub Secrets.")
+        raise ValueError("Invalid bot token. Please reset it in the Discord Developer Portal and update GitHub Secrets.")
     bot_info = r.json()
-    print(f"✅ Authenticated as {bot_info.get('username')}#{bot_info.get('discriminator')}")
+    print(f"Authenticated as {bot_info.get('username')}#{bot_info.get('discriminator')}")
 
     # 2. Check channel exists and bot can access it
     r = discord_get(f"https://discord.com/api/v10/channels/{CHANNEL_ID}")
     if r.status_code == 404:
-        raise ValueError("❌ Channel not found. Check the CHANNEL_ID and ensure the bot is in that server.")
+        raise ValueError("Channel not found. Check the CHANNEL_ID and ensure the bot is in that server.")
     if r.status_code == 403:
-        raise ValueError("❌ Bot lacks access to this channel. Check permissions in Discord.")
+        raise ValueError("Bot lacks access to this channel. Check permissions in Discord.")
 
     channel_info = r.json()
-    print(f"✅ Found channel: {channel_info.get('name')} (type: {channel_info.get('type')})")
+    print(f"Found channel: {channel_info.get('name')} (type: {channel_info.get('type')})")
 
     # 3. Check permissions (basic check: send messages)
     perms = channel_info.get("permissions", None)
     if perms is None:
-        print("⚠️ Could not verify permissions via API — ensure bot has Send Messages + Create Public Threads in Discord.")
+        print("Could not verify permissions via API — ensure bot has Send Messages + Create Public Threads in Discord.")
     else:
         # Discord permission bit for Send Messages is 0x00000800 (2048)
         if not (int(perms) & 0x00000800):
-            raise ValueError("❌ Bot does not have Send Messages permission in this channel.")
+            raise ValueError("Bot does not have Send Messages permission in this channel.")
 
 def main():
     preflight_check()
@@ -100,19 +100,19 @@ def main():
     unused_images = [img for img in all_images if img not in posted_images]
 
     if not unused_images:
-        print("🔄 All images used — resetting history.")
+        print("All images used — resetting history.")
         unused_images = all_images
         with open(POSTED_FILE, "w") as f:
             pass
 
     image_url = random.choice(unused_images)
 
-    message_payload = {"content": f"📷 Weekly Image:\n{image_url}"}
+    message_payload = {"content": f"Weekly Image:\n{image_url}"}
     message = send_discord_message(
         f"https://discord.com/api/v10/channels/{CHANNEL_ID}/messages",
         message_payload
     )
-    print(f"✅ Posted image: {image_url}")
+    print(f"Posted image: {image_url}")
 
     thread_payload = {
         "name": f"Weekly Image - {datetime.utcnow().strftime('%Y-%m-%d')}",
@@ -122,13 +122,13 @@ def main():
         f"https://discord.com/api/v10/channels/{CHANNEL_ID}/messages/{message['id']}/threads",
         thread_payload
     )
-    print(f"🧵 Created thread: {thread['name']}")
+    print(f"Created thread: {thread['name']}")
 
     send_discord_message(
         f"https://discord.com/api/v10/channels/{thread['id']}/messages",
         {"content": THREAD_MESSAGE}
     )
-    print("📝 Posted discussion message in thread.")
+    print("Posted discussion message in thread.")
 
     save_posted_image(image_url)
 
@@ -136,6 +136,6 @@ if __name__ == "__main__":
     try:
         main()
     except Exception as e:
-        print("❌ ERROR:", e)
+        print("ERROR:", e)
         traceback.print_exc()
         exit(1)
