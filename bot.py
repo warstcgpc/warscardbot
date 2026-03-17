@@ -1,6 +1,7 @@
 import os
 import random
 import discord
+from datetime import datetime
 
 TOKEN = os.getenv("DISCORD_BOT_TOKEN")
 CHANNEL_ID = int(os.getenv("DISCORD_CHANNEL_ID"))
@@ -48,7 +49,7 @@ async def on_ready():
     # Prepare embed
     embed = discord.Embed(
         title="WARS Card of the Week",
-        description="Enjoy this week's featured card!",
+        description="Discuss this week's featured card!",
         color=0xFFD700
     )
     embed.set_image(url=chosen)
@@ -58,9 +59,12 @@ async def on_ready():
     message = await channel.send(embed=embed)
 
     # Create a thread under the message
-    thread = await message.create_thread(
-        name="WARS Card of the Week Discussion"
-    )
+	# Format today's date as yyyy-MM-dd
+	today_str = datetime.utcnow().strftime("%Y-%m-%d")
+
+	thread = await message.create_thread(
+    	name=f"Card of the Week {today_str}"
+	)
 
     # Post follow-up message inside the thread
     await thread.send("Here's the WARS Card of the Week - Discuss here!")
