@@ -17,9 +17,6 @@ THREAD_MESSAGE = "💬 Here's our card of the week — use this thread to discus
 
 DEBUG = True  # Set to True to print extra info
 
-# Permissions integer: Send Messages + Create Public Threads + Send Messages in Threads + Embed Links + Attach Files
-PERMISSIONS_INT = 274877991936
-
 def debug_print(*args):
     if DEBUG:
         print("[DEBUG]", *args)
@@ -63,10 +60,6 @@ def save_posted_image(image_url):
     with open(POSTED_FILE, "a") as f:
         f.write(image_url + "\n")
 
-def generate_invite_link(client_id):
-    """Generate an OAuth2 invite link with correct permissions."""
-    return f"https://discord.com/oauth2/authorize?client_id={client_id}&scope=bot&permissions={PERMISSIONS_INT}"
-
 def preflight_check():
     """Verify token, channel, and permissions before posting."""
     if not BOT_TOKEN or not CHANNEL_ID:
@@ -77,20 +70,14 @@ def preflight_check():
     if r.status_code == 401:
         raise ValueError("❌ Invalid bot token. Please reset it in the Discord Developer Portal and update GitHub Secrets.")
     bot_info = r.json()
-    bot_name = f"{bot_info.get('username')}#{bot_info.get('discriminator')}"
-    client_id = bot_info.get("id")
-    print(f"✅ Authenticated as {bot_name}")
+    print(f"✅ Authenticated as {bot_info.get('username')}#{bot_info.get('discriminator')}")
 
     # 2. Check channel exists and bot can access it
     r = discord_get(f"https://discord.com/api/v10/channels/{CHANNEL_ID}")
     if r.status_code == 404:
-        invite_link = generate_invite_link(client_id)
-        raise ValueError(f"❌ Channel not found. Check the CHANNEL_ID and ensure the bot is in that server.\n"
-                         f"🔗 Invite the bot using this link:\n{invite_link}")
+        raise ValueError("❌ Channel not found. Check the CHANNEL_ID and ensure the bot is in that server.")
     if r.status_code == 403:
-        invite_link = generate_invite_link(client_id)
-        raise ValueError(f"❌ Bot lacks access to this channel. Check permissions in Discord.\n"
-                         f"🔗 Re-invite the bot with correct permissions:\n{invite_link}")
+        raise ValueError("❌ Bot lacks access to this channel. Check permissions in Discord.")
 
     channel_info = r.json()
     print(f"✅ Found channel: {channel_info.get('name')} (type: {channel_info.get('type')})")
@@ -100,10 +87,9 @@ def preflight_check():
     if perms is None:
         print("⚠️ Could not verify permissions via API — ensure bot has Send Messages + Create Public Threads in Discord.")
     else:
-        if not (int(perms) & 0x00000800):  # Send Messages bit
-            invite_link = generate_invite_link(client_id)
-            raise ValueError(f"❌ Bot does not have Send Messages permission in this channel.\n"
-                             f"🔗 Re-invite the bot with correct permissions:\n{invite_link}")
+        # Discord permission bit for Send Messages is 0x00000800 (2048)
+        if not (int(perms) & 0x00000800):
+            raise ValueError("❌ Bot does not have Send Messages permission in this channel.")
 
 def main():
     preflight_check()
