@@ -42,3 +42,35 @@ async def on_ready():
         remaining = all_images[:]  # reset to full list
         save_list(POSTED_FILE, posted_images)
 
+    # Pick a random unused image
+    chosen = random.choice(remaining)
+
+    # Prepare embed
+    embed = discord.Embed(
+        title="WARS Card of the Week",
+        description="Enjoy this week's featured card!",
+        color=0xFFD700
+    )
+    embed.set_image(url=chosen)
+
+    # Post embed to channel
+    channel = client.get_channel(CHANNEL_ID)
+    message = await channel.send(embed=embed)
+
+    # Create a thread under the message
+    thread = await message.create_thread(
+        name="WARS Card of the Week Discussion"
+    )
+
+    # Post follow-up message inside the thread
+    await thread.send("Here's the WARS Card of the Week - Discuss here!")
+
+    # Record the posted image
+    posted_images.append(chosen)
+    save_list(POSTED_FILE, posted_images)
+
+    # Close bot so GitHub Actions can finish
+    await client.close()
+
+
+client.run(TOKEN)
