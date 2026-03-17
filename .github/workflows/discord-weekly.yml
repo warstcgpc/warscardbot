@@ -1,9 +1,9 @@
-name: Run Discord Bot
+name: Weekly WARS Card Post
 
 on:
-  workflow_dispatch:   # Allows manual run
-  push:
-    branches: [ main ] # Or any branch you want
+  schedule:
+    - cron: "0 17 * * 1"   # Every Monday at 17:00 UTC
+  workflow_dispatch:        # Allow manual runs too
 
 jobs:
   run-bot:
