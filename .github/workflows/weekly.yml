@@ -2,7 +2,7 @@ name: Weekly Discord Bot
 
 on:
   schedule:
-    - cron: "0 9 * * 1"  # Every Monday at 09:00 UTC
+    - cron: "0 9 * * 1"
   workflow_dispatch:
 
 jobs:
@@ -22,7 +22,7 @@ jobs:
       - name: Install dependencies
         run: pip install requests
 
-      - name: Run bot
+      - name: Run bot with debug
         env:
           DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
           DISCORD_CHANNEL_ID: ${{ secrets.DISCORD_CHANNEL_ID }}
