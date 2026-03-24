@@ -59,12 +59,12 @@ async def on_ready():
     message = await channel.send(embed=embed)
 
     # Create a thread under the message
-	# Format today's date as yyyy-MM-dd
-	today_str = datetime.utcnow().strftime("%Y-%m-%d")
+    # Format today's date as yyyy-MM-dd
+    today_str = datetime.utcnow().strftime("%Y-%m-%d")
 
-	thread = await message.create_thread(
-    	name=f"Card of the Week {today_str}"
-	)
+    thread = await message.create_thread(
+        name=f"Card of the Week {today_str}"
+    )
 
     # Post follow-up message inside the thread
     await thread.send("Here's the WARS Card of the Week - Discuss here!")
